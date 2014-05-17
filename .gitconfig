@@ -1,0 +1,33 @@
+[push]
+    default = current
+[alias]
+    ci = commit
+    move = mv
+    del = rm
+    delete = rm
+    di = diff
+    h = help
+    rename = mv
+    ren = mv
+    stat = status
+    st = status
+    tug = !git pull && git push
+[color]
+    diff = auto
+    status = auto
+    branch = auto
+[color "branch"]
+    current = cyan reverse
+    local = cyan
+    remote = red
+[color "diff"]
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
+[color "status"]
+    added = blue bold
+    changed = green bold
+    untracked = red bold
+[core]
+    excludesfile = ~/.gitignore_global
