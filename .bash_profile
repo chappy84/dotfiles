@@ -1,6 +1,6 @@
 [ -e "$HOME/.ssh/config" ] && complete -o "default" -o "nospace" -W "$(grep "^Host" ~/.ssh/config | grep -v "[?*]" | cut -d " " -f2 | tr ' ' '\n')" scp sftp ssh
 
-if type _git &> /dev/null 
+if which git > /dev/null
 then
     if [ -f /Library/Developer/CommandLineTools/usr/share/git-core/git-completion.bash ]; then
         source /Library/Developer/CommandLineTools/usr/share/git-core/git-completion.bash
