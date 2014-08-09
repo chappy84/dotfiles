@@ -15,3 +15,7 @@ fi
 if which brew > /dev/null && [ -f "$(brew --prefix)/Library/Contributions/brew_bash_completion.sh" ]; then
     source "$(brew --prefix)/Library/Contributions/brew_bash_completion.sh"
 fi
+
+for file in ~/bash_completion.d/*; do
+    source $file;
+done
