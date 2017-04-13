@@ -1,63 +1,131 @@
-#!/bin/sh
+#!/usr/bin/env bash
+
 _composer()
 {
-    local cur prev coms opts
+    local cur script coms opts com
     COMPREPLY=()
-    cur="${COMP_WORDS[COMP_CWORD]}"
-    prev="${COMP_WORDS[COMP_CWORD-1]}"
-    coms="about archive browse clear-cache config create-project depends diagnose dump-autoload global help init install licenses list remove require run-script search self-update show status update validate"
-    opts="--help --quiet --verbose --version --ansi --no-ansi --no-interaction --profile --working-dir"
+    _get_comp_words_by_ref -n : cur words
 
-    if [[ ${COMP_CWORD} = 1 ]] ; then
-        COMPREPLY=($(compgen -W "${coms}" -- ${cur}))
-        return 0
+    # for an alias, get the real script behind it
+    if [[ $(type -t ${words[0]}) == "alias" ]]; then
+        script=$(alias ${words[0]} | sed -E "s/alias ${words[0]}='(.*)'/\1/")
+    else
+        script=${words[0]}
     fi
 
-    case "${prev}" in
-            archive)
-            opts="${opts} --format --dir"
-            ;;    browse)
-            opts="${opts} --homepage"
-            ;;    config)
-            opts="${opts} --global --editor --auth --unset --list --file"
-            ;;    create-project)
-            opts="${opts} --stability --prefer-source --prefer-dist --repository-url --dev --no-dev --no-plugins --no-custom-installers --no-scripts --no-progress --keep-vcs --no-install"
-            ;;    depends)
-            opts="${opts} --link-type"
-            ;;    dump-autoload)
-            opts="${opts} --optimize --no-dev"
-            ;;    help)
-            opts="${opts} --xml --format --raw"
-            ;;    init)
-            opts="${opts} --name --description --author --homepage --require --require-dev --stability --license"
-            ;;    install)
-            opts="${opts} --prefer-source --prefer-dist --dry-run --dev --no-dev --no-plugins --no-custom-installers --no-scripts --no-progress --optimize-autoloader"
-            ;;    licenses)
-            opts="${opts} --format"
-            ;;    list)
-            opts="${opts} --xml --raw --format"
-            ;;    remove)
-            opts="${opts} --dev --no-progress --no-update --update-no-dev --update-with-dependencies"
-            ;;    require)
-            opts="${opts} --dev --prefer-source --prefer-dist --no-progress --no-update --update-no-dev --update-with-dependencies"
-            ;;    run-script)
-            opts="${opts} --dev --no-dev"
-            ;;    search)
-            opts="${opts} --only-name"
-            ;;    self-update)
-            opts="${opts} --rollback --clean-backups"
-            ;;    show)
-            opts="${opts} --installed --platform --available --self --name-only --path"
-            ;;    update)
-            opts="${opts} --prefer-source --prefer-dist --dry-run --dev --no-dev --lock --no-plugins --no-custom-installers --no-scripts --no-progress --with-dependencies --optimize-autoloader"
-            ;;    validate)
-            opts="${opts} --no-check-all"
+    # lookup for command
+    for word in ${words[@]:1}; do
+        if [[ $word != -* ]]; then
+            com=$word
+            break
+        fi
+    done
+
+    # completing for an option
+    if [[ ${cur} == --* ]] ; then
+        opts="--help --quiet --verbose --version --ansi --no-ansi --no-interaction --profile --no-plugins --working-dir"
+
+        case "$com" in
+            about)
+            opts="${opts} "
             ;;
+            archive)
+            opts="${opts} --format --dir --file --ignore-filters"
+            ;;
+            browse)
+            opts="${opts} --homepage --show"
+            ;;
+            clear-cache)
+            opts="${opts} "
+            ;;
+            config)
+            opts="${opts} --global --editor --auth --unset --list --file --absolute"
+            ;;
+            create-project)
+            opts="${opts} --stability --prefer-source --prefer-dist --repository --repository-url --dev --no-dev --no-custom-installers --no-scripts --no-progress --no-secure-http --keep-vcs --no-install --ignore-platform-reqs"
+            ;;
+            depends)
+            opts="${opts} --recursive --tree"
+            ;;
+            diagnose)
+            opts="${opts} "
+            ;;
+            dump-autoload)
+            opts="${opts} --no-scripts --optimize --classmap-authoritative --apcu --no-dev"
+            ;;
+            exec)
+            opts="${opts} --list"
+            ;;
+            global)
+            opts="${opts} "
+            ;;
+            help)
+            opts="${opts} --xml --format --raw"
+            ;;
+            init)
+            opts="${opts} --name --description --author --type --homepage --require --require-dev --stability --license --repository"
+            ;;
+            install)
+            opts="${opts} --prefer-source --prefer-dist --dry-run --dev --no-dev --no-custom-installers --no-autoloader --no-scripts --no-progress --no-suggest --optimize-autoloader --classmap-authoritative --apcu-autoloader --ignore-platform-reqs"
+            ;;
+            licenses)
+            opts="${opts} --format --no-dev"
+            ;;
+            list)
+            opts="${opts} --xml --raw --format"
+            ;;
+            outdated)
+            opts="${opts} --outdated --all --direct --strict --minor-only --format"
+            ;;
+            prohibits)
+            opts="${opts} --recursive --tree"
+            ;;
+            remove)
+            opts="${opts} --dev --no-progress --no-update --no-scripts --update-no-dev --update-with-dependencies --no-update-with-dependencies --ignore-platform-reqs --optimize-autoloader --classmap-authoritative --apcu-autoloader"
+            ;;
+            require)
+            opts="${opts} --dev --prefer-source --prefer-dist --no-progress --no-suggest --no-update --no-scripts --update-no-dev --update-with-dependencies --ignore-platform-reqs --prefer-stable --prefer-lowest --sort-packages --optimize-autoloader --classmap-authoritative --apcu-autoloader"
+            ;;
+            run-script)
+            opts="${opts} --timeout --dev --no-dev --list"
+            ;;
+            search)
+            opts="${opts} --only-name --type"
+            ;;
+            self-update)
+            opts="${opts} --rollback --clean-backups --no-progress --update-keys --stable --preview --snapshot --set-channel-only"
+            ;;
+            show)
+            opts="${opts} --all --installed --platform --available --self --name-only --path --tree --latest --outdated --minor-only --direct --strict --format"
+            ;;
+            status)
+            opts="${opts} "
+            ;;
+            suggests)
+            opts="${opts} --by-package --by-suggestion --no-dev"
+            ;;
+            update)
+            opts="${opts} --prefer-source --prefer-dist --dry-run --dev --no-dev --lock --no-custom-installers --no-autoloader --no-scripts --no-progress --no-suggest --with-dependencies --optimize-autoloader --classmap-authoritative --apcu-autoloader --ignore-platform-reqs --prefer-stable --prefer-lowest --interactive --root-reqs"
+            ;;
+            validate)
+            opts="${opts} --no-check-all --no-check-lock --no-check-publish --with-dependencies --strict"
+            ;;
+
         esac
 
-    COMPREPLY=($(compgen -W "${opts}" -- ${cur}))
-    return 0;
-}
+        COMPREPLY=($(compgen -W "${opts}" -- ${cur}))
+        __ltrim_colon_completions "$cur"
 
-complete -o default -F _composer composer
-COMP_WORDBREAKS=${COMP_WORDBREAKS//:}
+        return 0;
+    fi
+
+    # completing for a command
+    if [[ $cur == $com ]]; then
+        coms="about archive browse clear-cache config create-project depends diagnose dump-autoload exec global help init install licenses list outdated prohibits remove require run-script search self-update show status suggests update validate"
+
+        COMPREPLY=($(compgen -W "${coms}" -- ${cur}))
+        __ltrim_colon_completions "$cur"
+
+        return 0
+    fi
+}
