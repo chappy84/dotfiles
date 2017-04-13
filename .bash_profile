@@ -20,6 +20,12 @@ for file in ~/bash_completion.d/*; do
     source $file;
 done
 
+which docker > /dev/null
+if [[ !$? && -f $HOME/.composer/composer.phar ]]
+then
+    alias composer='docker run --rm -it -v $HOME:$HOME -v `pwd`:/mnt/code -e COMPOSER_HOME="$HOME/.composer" php:latest php -d memory_limit=-1 -d error_reporting=E_ALL $HOME/.composer/composer.phar'
+fi
+
 SSH_ENV="$HOME/.ssh/environment"
 
 function start_agent {
