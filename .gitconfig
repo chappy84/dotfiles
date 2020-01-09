@@ -1,17 +1,14 @@
 [push]
     default = current
 [alias]
+    amend = commit --amend --no-edit
     ci = commit
-    move = mv
-    del = rm
-    delete = rm
     di = diff
+    force = push --force-with-lease
     h = help
-    rename = mv
-    ren = mv
-    stat = status
     st = status
     tug = !git pull && git push
+    wat = log --graph --decorate --oneline
 [color]
     diff = auto
     status = auto
