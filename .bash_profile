@@ -1,5 +1,7 @@
+# Autocomplete hostnames for ssh & related commands
 [ -e "$HOME/.ssh/config" ] && complete -o "default" -o "nospace" -W "$(grep "^Host" ~/.ssh/config | grep -v "[?*]" | cut -d " " -f2 | tr ' ' '\n')" scp sftp ssh sshfs
 
+# Autocomplete git from wherever it may be installed
 if which git > /dev/null
 then
     if [ -f /Library/Developer/CommandLineTools/usr/share/git-core/git-completion.bash ]; then
@@ -12,20 +14,39 @@ then
     fi
 fi
 
-if which brew > /dev/null && [ -f "$(brew --prefix)/Library/Contributions/brew_bash_completion.sh" ]; then
-    source "$(brew --prefix)/Library/Contributions/brew_bash_completion.sh"
+# Setup Brew
+if which brew > /dev/null
+then
+    # Add brew installed commands to available commands
+    PATH=/usr/local/bin:$PATH
+    # Add in brew command completion
+    if [[ -f "$(brew --prefix)/Library/Contributions/brew_bash_completion.sh" ]]
+    then
+        source "$(brew --prefix)/Library/Contributions/brew_bash_completion.sh"
+    fi
 fi
 
+# Add in any other command auto completion
 for file in ~/bash_completion.d/*; do
     source $file;
 done
 
+# Add in ability to run composer inside docker
 which docker > /dev/null
 if [[ !$? && -f $HOME/.composer/composer.phar ]]
 then
     alias composer='docker run --rm -it -v $HOME:$HOME -v `pwd`:/mnt/code -e COMPOSER_HOME="$HOME/.composer" php:latest php -d memory_limit=-1 -d error_reporting=E_ALL $HOME/.composer/composer.phar'
 fi
 
+# Add command to flush dns if on a mac
+[ -s "/usr/bin/dscacheutil" ] && alias flushdns='dscacheutil -flushcache;sudo killall -HUP mDNSResponder'
+
+# Setup NVM for using different node versions
+export NVM_DIR="$HOME/.nvm"
+[ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"  # This loads nvm
+[ -s "/usr/local/opt/nvm/etc/bash_completion.d/nvm" ] && . "/usr/local/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+
+# Setup ssh-agent so only have to enter ssl key once
 SSH_ENV="$HOME/.ssh/environment"
 
 function start_agent {
@@ -48,3 +69,6 @@ if [ -f "${SSH_ENV}" ]; then
 else
      start_agent;
 fi
+
+# Setup path to source commands from local NPM / Composer paths first
+PATH=./vendor/bin:./node_modules/.bin:$HOME/.composer/vendor/bin:$PATH
