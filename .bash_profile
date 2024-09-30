@@ -1,28 +1,34 @@
 # Autocomplete hostnames for ssh & related commands
 [ -e "$HOME/.ssh/config" ] && complete -o "default" -o "nospace" -W "$(grep "^Host" ~/.ssh/config | grep -v "[?*]" | cut -d " " -f2 | tr ' ' '\n')" scp sftp ssh sshfs
 
-# Autocomplete git from wherever it may be installed
-if which git > /dev/null
-then
-    if [ -f /Library/Developer/CommandLineTools/usr/share/git-core/git-completion.bash ]; then
-        source /Library/Developer/CommandLineTools/usr/share/git-core/git-completion.bash
-    else
-        GIT_VERSION=`git --version | awk '{print $3}'`
-        if [ -f /usr/share/doc/git-$GIT_VERSION/contrib/completion/git-completion.bash ]; then
-            source /usr/share/doc/git-$GIT_VERSION/contrib/completion/git-completion.bash
-        fi
-    fi
-fi
-
 # Setup Brew
-if which brew > /dev/null
+which brew > /dev/null
+brew_found="$?"
+if [[ "$brew_found" == "0" ]]
 then
     # Add brew installed commands to available commands
     PATH=/usr/local/bin:$PATH
-    # Add in brew command completion
-    if [[ -f "$(brew --prefix)/Library/Contributions/brew_bash_completion.sh" ]]
+fi
+
+# Only add certain auto completions for when not using zsh
+if [[ -z ${ZSH_VERSION-} ]]; then
+    # Autocomplete git from wherever it may be installed
+    if which git > /dev/null
     then
-        source "$(brew --prefix)/Library/Contributions/brew_bash_completion.sh"
+        if [ -f /Library/Developer/CommandLineTools/usr/share/git-core/git-completion.bash ]; then
+            source /Library/Developer/CommandLineTools/usr/share/git-core/git-completion.bash
+        else
+            GIT_VERSION=`git --version | awk '{print $3}'`
+            if [ -f /usr/share/doc/git-$GIT_VERSION/contrib/completion/git-completion.bash ]; then
+                source /usr/share/doc/git-$GIT_VERSION/contrib/completion/git-completion.bash
+            fi
+        fi
+    fi
+
+    # Add in brew command completion
+    if [[ "$brew_found" == "0" && -f "$(brew --prefix)/Homebrew/completions/bash/brew" ]]
+    then
+        source "$(brew --prefix)/Homebrew/completions/bash/brew"
     fi
 fi
 
