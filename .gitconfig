@@ -8,6 +8,7 @@
     h = help
     st = status
     tug = !git pull && git push
+    update-fork = "!f() { git push \"$2\" \"refs/remotes/$1/*:refs/heads/*\"; }; f"
     wat = log --graph --decorate --oneline
 [color]
     diff = auto
